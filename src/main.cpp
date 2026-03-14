@@ -7,13 +7,25 @@ class $modify(MyMenuLayer, MenuLayer) {
     bool init() {
         if (!MenuLayer::init()) return false;
 
-        // Hardcoded message (replace with remote JSON if native networking is available)
-        std::string message = "hello there bruhh";
-        std::string from = "Harold Hutchin";
+        // Ensure popup only shows once per session
+        static bool shown = false;
+        if (!shown) {
+            shown = true;
 
-        std::string fullMessage = message + "\n\nFrom: " + from + "\n[RGDPS Announcement]";
+            std::string message = "hello there bruhh";
+            std::string from = "Harold Hutchin";
+            std::string fullMessage = message + "\n\nFrom: " + from + "\n[RGDPS Announcement]";
 
-        FLAlertLayer::create("Geode", fullMessage.c_str(), "OK")->show();
+            // Create the FLAlertLayer
+            auto alert = FLAlertLayer::create(
+                "RGDPS Announcement",  // Title
+                fullMessage.c_str(),      // Message
+                "OK"                      // Button text
+            );
+
+            // Show it — it will stay until the player taps OK
+            alert->show();
+        }
 
         return true;
     }
