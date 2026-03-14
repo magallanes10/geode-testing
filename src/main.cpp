@@ -1,54 +1,42 @@
 #include <Geode/Geode.hpp>
 #include <Geode/modify/MenuLayer.hpp>
-#include <cocos2d.h>
-#include <network/HttpClient.h>
-#include <json.hpp> // for JSON parsing
-using json = nlohmann::json;
-
 using namespace geode::prelude;
-using namespace cocos2d::network;
 
 class $modify(MyMenuLayer, MenuLayer) {
     bool init() {
         if (!MenuLayer::init()) return false;
 
-        // Create the popup automatically
         fetchAndShowPopup();
-
         return true;
     }
 
     void fetchAndShowPopup() {
-        auto request = new HttpRequest();
+        cocos2d::network::HttpRequest* request = new cocos2d::network::HttpRequest();
         request->setUrl("https://pastebin.com/raw/JiRtFNBG");
-        request->setRequestType(HttpRequest::Type::GET);
+        request->setRequestType(cocos2d::network::HttpRequest::Type::GET);
 
-        request->setResponseCallback([this](HttpClient* client, HttpResponse* response) {
+        request->setResponseCallback([this](cocos2d::network::HttpClient*, cocos2d::network::HttpResponse* response) {
             if (!response || !response->isSucceed()) {
                 log::warn("Failed to fetch remote popup message!");
                 return;
             }
 
-            std::vector<char> *buffer = response->getResponseData();
-            std::string data(buffer->begin(), buffer->end());
+            std::string data(response->getResponseData()->begin(), response->getResponseData()->end());
 
             try {
-                auto jsonData = json::parse(data);
-                std::string message = jsonData["message"];
-                std::string from = jsonData["from"];
+                auto jsonData = geode::json::parse(data);
+                std::string message = jsonData.at("message").as_string();
+                std::string from = jsonData.at("from").as_string();
 
-                // Add RGDPS announcement
                 std::string fullMessage = message + "\n\nFrom: " + from + "\n[RGDPS Announcement]";
-
-                // Show the popup
                 FLAlertLayer::create("Geode", fullMessage.c_str(), "OK")->show();
 
-            } catch (std::exception& e) {
+            } catch (const std::exception& e) {
                 log::warn("Failed to parse JSON: {}", e.what());
             }
         });
 
-        HttpClient::getInstance()->send(request);
+        cocos2d::network::HttpClient::getInstance()->send(request);
         request->release();
     }
 };
