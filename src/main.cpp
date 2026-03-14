@@ -7,20 +7,13 @@ class $modify(MyMenuLayer, MenuLayer) {
     bool init() {
         if (!MenuLayer::init()) return false;
 
-        // Fetch JSON automatically and show popup
-        Network::getJSON("https://pastebin.com/raw/JiRtFNBG")
-            .then([](auto jsonData) {
-                // Extract fields from JSON
-                std::string message = jsonData["message"].as_string();
-                std::string from = jsonData["from"].as_string();
+        // Hardcoded message (replace with remote JSON if native networking is available)
+        std::string message = "hello there bruhh";
+        std::string from = "Harold Hutchin";
 
-                std::string fullMessage = message + "\n\nFrom: " + from + "\n[RGDPS Announcement]";
+        std::string fullMessage = message + "\n\nFrom: " + from + "\n[RGDPS Announcement]";
 
-                FLAlertLayer::create("Geode", fullMessage.c_str(), "OK")->show();
-            })
-            .catch_error([](std::string err){
-                log::warn("Failed to fetch JSON: {}", err);
-            });
+        FLAlertLayer::create("Geode", fullMessage.c_str(), "OK")->show();
 
         return true;
     }
