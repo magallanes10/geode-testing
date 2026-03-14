@@ -1,10 +1,11 @@
 #include <Geode/Geode.hpp>
 #include <Geode/modify/MenuLayer.hpp>
 #include <Geode/ui/Popup.hpp>
+#include <Geode/ui/Button.hpp>
 
 using namespace geode::prelude;
 
-// Your custom popup class
+// Custom popup with OK button
 class MyPopup : public geode::Popup {
 protected:
     bool init(const std::string& value) {
@@ -13,8 +14,17 @@ protected:
 
         this->setTitle("RGDPS Announcement");
 
-        auto label = CCLabelBMFont::create(value.c_str(), "bigFont.fnt");
-        m_mainLayer->addChildAtPosition(label, Anchor::Center);
+        // Message text
+        auto label = CCLabelBMFont::create(value.c_str(), "goldFont.fnt");
+        label->setPosition({120.f, 100.f}); // slightly higher for button space
+        m_mainLayer->addChild(label);
+
+        // Add OK button
+        auto okButton = SimpleButton::create("OK", [this]() {
+            this->close(); // closes the popup when tapped
+        });
+        okButton->setPosition({120.f, 40.f}); // center bottom
+        m_mainLayer->addChild(okButton);
 
         return true;
     }
@@ -31,20 +41,16 @@ public:
     }
 };
 
-// Modify the MenuLayer to show popup on start
+// Modify MenuLayer to show popup immediately
 class $modify(MyMenuLayer, MenuLayer) {
     bool init() {
         if (!MenuLayer::init()) return false;
 
-        // Hardcoded message
-        std::string message = "hello there bruhh";
-        std::string from = "Harold Hutchin";
-        std::string fullMessage = message + "\n\nFrom: " + from + "\n[RGDPS Announcement]";
+        std::string message = "Hello there bruhh\nFrom: Harold Hutchin\n[RGDPS Announcement]";
 
-        // Show your custom popup
-        auto popup = MyPopup::create(fullMessage);
+        auto popup = MyPopup::create(message);
         if (popup)
-            popup->show();
+            popup->show(); // shows popup; player must tap OK
 
         return true;
     }
