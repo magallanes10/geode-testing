@@ -11,19 +11,19 @@ class $modify(MyMenuLayer, MenuLayer) {
         std::string from = "Harold Hutchin";
         std::string fullMessage = message + "\n\nFrom: " + from + "\n[RGDPS Announcement]";
 
-        // Ensure the alert is modal and requires OK
-        this->scheduleOnce([this, fullMessage](float){
-            auto alert = FLAlertLayer::create(
-                "Geode",       // Title
-                fullMessage.c_str(), // Message
-                "OK"           // Button text
-            );
-
-            // Make sure it’s modal and blocks all touches until dismissed
-            alert->setKeypadEnabled(true); // Optional: allow back button if on mobile
-            alert->setTouchEnabled(true);
-            alert->show(); // Show it on the current MenuLayer
-        }, 0.1f, "show_alert");
+        // Use runAction to delay the pop-up
+        this->runAction(CCSequence::create(
+            CCDelayTime::create(0.1f),   // small delay to ensure MenuLayer is ready
+            CCCallFunc::create([fullMessage, this]() {
+                auto alert = FLAlertLayer::create(
+                    "Geode",        // Title
+                    fullMessage.c_str(), // Message
+                    "OK"            // Button
+                );
+                alert->show(); // modal, blocks until OK is pressed
+            }),
+            nullptr
+        ));
 
         return true;
     }
