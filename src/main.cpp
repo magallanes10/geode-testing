@@ -3,26 +3,39 @@
 
 using namespace geode::prelude;
 
-// Global flag for session
-static bool g_popupShown = false;
-
 class $modify(MyMenuLayer, MenuLayer) {
     bool init() {
-        if (!MenuLayer::init()) return false;
+        if (!MenuLayer::init())
+            return false;
 
-        // Only show popup once per session
-        if (!g_popupShown) {
-            g_popupShown = true;
+        // Find the bottom menu
+        auto menuNode = this->getChildByID("bottom-menu");
+        if (!menuNode)
+            return true;
 
-            std::string message = "Hello there bruhh\nFrom: Harold Hutchin\n[RGDPS Announcement]";
+        // Create button with GD info icon
+        auto myButton = CCMenuItemSpriteExtra::create(
+            CCSprite::createWithSpriteFrameName("GJ_info_001.png"), // info icon
+            this,
+            menu_selector(MyMenuLayer::onMyButton)
+        );
 
-            FLAlertLayer::create(
-                "RGDPS Announcement", // title
-                message.c_str(),      // content
-                "OK"                  // button text
-            )->show();
-        }
+        // Unique ID for layout
+        myButton->setID("my-popup-button"_spr);
+
+        // Add button to bottom menu
+        menuNode->addChild(myButton);
+        menuNode->updateLayout(); // ensures proper placement
 
         return true;
+    }
+
+    // Button callback
+    void onMyButton(CCObject*) {
+        FLAlertLayer::create(
+            "RGDPS Announcement",                   // title
+            "Hello there bruhh!\nThis is your message.", // content
+            "OK"                                     // button text
+        )->show();
     }
 };
