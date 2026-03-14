@@ -1,13 +1,11 @@
 #include <Geode/Geode.hpp>
-#include <Geode/modify/MenuLayer.hpp>
-
+#include <Geode/modify/MainMenuLayer.hpp>
 using namespace geode::prelude;
 
-class $modify(MyMenuLayer, MenuLayer) {
+class $modify(MyMainMenu, MainMenuLayer) {
     bool init() {
-        if (!MenuLayer::init()) return false;
+        if (!MainMenuLayer::init()) return false;
 
-        // Ensure popup only shows once per session
         static bool shown = false;
         if (!shown) {
             shown = true;
@@ -16,15 +14,8 @@ class $modify(MyMenuLayer, MenuLayer) {
             std::string from = "Harold Hutchin";
             std::string fullMessage = message + "\n\nFrom: " + from + "\n[RGDPS Announcement]";
 
-            // Create the FLAlertLayer
-            auto alert = FLAlertLayer::create(
-                "RGDPS Announcement",  // Title
-                fullMessage.c_str(),      // Message
-                "OK"                      // Button text
-            );
-
-            // Show it — it will stay until the player taps OK
-            alert->show();
+            // Show the popup — stays until "OK" is tapped
+            FLAlertLayer::create("RGDPS Announcement", fullMessage.c_str(), "OK")->show();
         }
 
         return true;
