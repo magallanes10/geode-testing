@@ -3,19 +3,25 @@
 
 using namespace geode::prelude;
 
+// Global flag for session
+static bool g_popupShown = false;
+
 class $modify(MyMenuLayer, MenuLayer) {
     bool init() {
         if (!MenuLayer::init()) return false;
 
-        // Simple message
-        std::string message = "Hello there bruhh\nFrom: Harold Hutchin\n[RGDPS Announcement]";
+        // Only show popup once per session
+        if (!g_popupShown) {
+            g_popupShown = true;
 
-        // Show classic FLAlertLayer with OK button
-        FLAlertLayer::create(
-            "RGDPS Announcement", // title
-            message.c_str(),      // content
-            "OK"                  // button text
-        )->show();
+            std::string message = "Hello there bruhh\nFrom: Harold Hutchin\n[RGDPS Announcement]";
+
+            FLAlertLayer::create(
+                "RGDPS Announcement", // title
+                message.c_str(),      // content
+                "OK"                  // button text
+            )->show();
+        }
 
         return true;
     }
