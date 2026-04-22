@@ -4,13 +4,17 @@
 
 using namespace geode::prelude;
 
+// Global session tracker remains outside the modify class
 bool G_ANNOUNCEMENT_SHOWN = false;
 
 class $modify(MyMenuLayer, MenuLayer) {
-    // We use a TaskListener to handle the web request safely
-    EventListener<web::WebTask> m_listener;
+    // Geode Rule: All variables in a modify class MUST be inside this struct
+    struct Fields {
+        EventListener<web::WebTask> m_listener;
+    };
 
     bool init() {
+        // Correct way to call parent init in modern Geode
         if (!MenuLayer::init()) return false;
 
         if (!G_ANNOUNCEMENT_SHOWN) {
@@ -21,21 +25,20 @@ class $modify(MyMenuLayer, MenuLayer) {
     }
 
     void fetchAnnouncement() {
-        // Create the request
         auto req = web::WebRequest();
         
-        // Use a listener to handle the response
-        m_listener.bind([this](web::WebResponse* res) {
+        // Access fields using m_fields->
+        m_fields->m_listener.bind([this](web::WebResponse* res) {
             if (res && res->ok()) {
-                // In v3, res->json() returns a geode::Result. 
-                // We check if it's successful and then unwrap it.
                 auto jsonResult = res->json();
                 
                 if (jsonResult && jsonResult.unwrap().contains("announcement")) {
                     auto ann = jsonResult.unwrap()["announcement"];
                     
-                    std::string title = ann["title"].as_string();
-                    std::string context = ann["context"].as_string();
+                    // Fixed: asString() instead of as_string() 
+                    // and unwrap() to get the string value safely
+                    std::string title = ann["title"].asString();
+                    std::string context = ann["context"].asString();
 
                     FLAlertLayer::create(
                         title.c_str(), 
@@ -50,7 +53,6 @@ class $modify(MyMenuLayer, MenuLayer) {
             }
         });
 
-        // Start the request and link it to the listener
-        m_listener.setFilter(req.get("https://pastebin.com/raw/vRNYgwyL"));
+        m_fields->m_listener.setFilter(req.get("https://pastebin.com/raw/vRNYgwyL"));
     }
 };
